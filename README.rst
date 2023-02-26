@@ -1,23 +1,26 @@
 AWS SQS Listener
 ----------------
 
-.. image:: https://img.shields.io/pypi/v/pySqsListener.svg?style=popout
+.. image:: https://img.shields.io/pypi/v/pyAsyncSqsListener.svg?style=popout
    :alt: PyPI
-   :target: https://github.com/jegesh/python-sqs-listener
-.. image:: https://img.shields.io/pypi/pyversions/pySqsListener.svg?style=popout
+   :target: https://github.com/rathourarv/py-async-sqs-listener
+.. image:: https://img.shields.io/pypi/pyversions/pyAsyncSqsListener.svg?style=popout
    :alt: PyPI - Python Version
-   :target: https://pypi.org/project/pySqsListener/
+   :target: https://pypi.org/project/pyAsyncSqsListener/
 
 
-
+Motivation
+----------------
+This repository is forked of https://github.com/jegesh/python-sqs-listener and modified later to
+accommodate asyncio changes. Thanks to Yaakov Gesher for this repo.
 
 This package takes care of the boilerplate involved in listening to an SQS
-queue, as well as sending messages to a queue.  Works with python 2.7 & 3.6+.
+queue, as well as sending messages to a queue.  Works with python 3.11+.
 
 Installation
 ~~~~~~~~~~~~
 
-``pip install pySqsListener``
+``pip install asyncpySqsListener``
 
 Listening to a queue
 ~~~~~~~~~~~~~~~~~~~~
@@ -36,11 +39,11 @@ Here is a basic code sample:
     from sqs_listener import SqsListener
 
     class MyListener(SqsListener):
-        def handle_message(self, body, attributes, messages_attributes):
+        async def handle_message(self, body, attributes, messages_attributes):
             run_my_function(body['param1'], body['param2'])
 
     listener = MyListener('my-message-queue', error_queue='my-error-queue', region_name='us-east-1')
-    listener.listen()
+    asyncio.run(listener.listen())
 
 **Error Listener**
 
@@ -48,11 +51,11 @@ Here is a basic code sample:
 
     from sqs_listener import SqsListener
     class MyErrorListener(SqsListener):
-        def handle_message(self, body, attributes, messages_attributes):
+        async def handle_message(self, body, attributes, messages_attributes):
             save_to_log(body['exception_type'], body['error_message']
 
     error_listener = MyErrorListener('my-error-queue')
-    error_listener.listen()
+    asyncio.run(error_listener.listen())
 
 
 | The options available as ``kwargs`` are as follows:

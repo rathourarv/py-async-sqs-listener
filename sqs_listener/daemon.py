@@ -16,7 +16,14 @@ class Daemon:
     Usage: subclass the Daemon class and override the run() method
     """
 
-    def __init__(self, pidfile, overwrite=False, stdout='/dev/stdout', stderr='/dev/stderr', stdin='/dev/null'):
+    def __init__(
+        self,
+        pidfile,
+        overwrite=False,
+        stdout="/dev/stdout",
+        stderr="/dev/stderr",
+        stdin="/dev/null",
+    ):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
@@ -56,13 +63,13 @@ class Daemon:
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
-        si = open(self.stdin, 'r')
+        si = open(self.stdin, "r")
         if sys.stdout.isatty():
-            so = open(self.stdout, 'a+')
-            se = open(self.stderr, 'a+')
+            so = open(self.stdout, "a+")
+            se = open(self.stderr, "a+")
         else:
-            so = open(self.stdout, 'w')
-            se = open(self.stderr, 'w')
+            so = open(self.stdout, "w")
+            se = open(self.stderr, "w")
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
@@ -70,7 +77,7 @@ class Daemon:
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
-        open(self.pidfile, 'w+').write("%s\n" % pid)
+        open(self.pidfile, "w+").write("%s\n" % pid)
 
     def delpid(self):
         os.remove(self.pidfile)
@@ -81,7 +88,7 @@ class Daemon:
         """
         # Check for a pidfile to see if the daemon already runs
         try:
-            pf = open(self.pidfile, 'r')
+            pf = open(self.pidfile, "r")
             pid = int(pf.read().strip())
             pf.close()
         except IOError:
@@ -96,9 +103,9 @@ class Daemon:
 
         # wipe logs if necessary
         if self.overwrite_output:
-            out_file = open(self.stdout, 'w')
+            out_file = open(self.stdout, "w")
             out_file.close()
-            err_file = open(self.stderr, 'w')
+            err_file = open(self.stderr, "w")
             err_file.close()
         # Start the daemon
         self.daemonize()
@@ -110,7 +117,7 @@ class Daemon:
         """
         # Get the pid from the pidfile
         try:
-            pf = open(self.pidfile, 'r')
+            pf = open(self.pidfile, "r")
             pid = int(pf.read().strip())
             pf.close()
         except IOError:

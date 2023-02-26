@@ -6,5 +6,5 @@ venv
 .DS_Store
 build
 dist
-pySqsListener.egg-info
+asyncSqsListener.egg-info
 test_listen.py

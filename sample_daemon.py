@@ -2,34 +2,35 @@
 a sample daemonization script for the sqs listener
 """
 
+import asyncio
 import sys
 from sqs_listener.daemon import Daemon
 from sqs_listener import SqsListener
 
 
 class MyListener(SqsListener):
-    def handle_message(self, body, attributes, messages_attributes):
-        pass
+    async def handle_message(self, body, attributes, messages_attributes):
         # run your code here
+        print(f"message received {body}")
 
 
 class MyDaemon(Daemon):
     def run(self):
         print("Initializing listener")
-        listener = MyListener('main-queue', 'error-queue')
-        listener.listen()
+        listener = MyListener("test-queue", interval=5, max_number_of_messages=5)
+        asyncio.run(listener.listen())
 
 
 if __name__ == "__main__":
-    daemon = MyDaemon('/var/run/sqs_daemon.pid')
+    daemon = MyDaemon("/tmp/sqs_daemon.pid")
     if len(sys.argv) == 2:
-        if 'start' == sys.argv[1]:
+        if "start" == sys.argv[1]:
             print("Starting listener daemon")
             daemon.start()
-        elif 'stop' == sys.argv[1]:
+        elif "stop" == sys.argv[1]:
             print("Attempting to stop the daemon")
             daemon.stop()
-        elif 'restart' == sys.argv[1]:
+        elif "restart" == sys.argv[1]:
             daemon.restart()
         else:
             print("Unknown command")

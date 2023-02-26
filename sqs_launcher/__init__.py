@@ -22,12 +22,18 @@ import boto3.session
 # start class
 # ================
 
-sqs_logger = logging.getLogger('sqs_listener')
+sqs_logger = logging.getLogger("sqs_listener")
 
 
 class SqsLauncher(object):
-
-    def __init__(self, queue=None, queue_url=None, create_queue=False, visibility_timeout='600', serializer=json.dumps):
+    def __init__(
+        self,
+        queue=None,
+        queue_url=None,
+        create_queue=False,
+        visibility_timeout="600",
+        serializer=json.dumps,
+    ):
         """
         :param queue: (str) name of queue to listen to
         :param queue_url: (str) url of queue to listen to
@@ -39,17 +45,19 @@ class SqsLauncher(object):
                                     for more information
         """
         if not any([queue, queue_url]):
-            raise ValueError('Either `queue` or `queue_url` should be provided.')
-        
-        if (
-            not os.environ.get('AWS_ACCOUNT_ID', None) and 
-            not (boto3.Session().get_credentials().method in ['iam-role', 'assume-role', 'assume-role-with-web-identity'])
+            raise ValueError("Either `queue` or `queue_url` should be provided.")
+
+        if not os.environ.get("AWS_ACCOUNT_ID", None) and not (
+            boto3.Session().get_credentials().method
+            in ["iam-role", "assume-role", "assume-role-with-web-identity"]
         ):
-            raise EnvironmentError('Environment variable `AWS_ACCOUNT_ID` not set and no role found.')
-        
+            raise EnvironmentError(
+                "Environment variable `AWS_ACCOUNT_ID` not set and no role found."
+            )
+
         # new session for each instantiation
         self._session = boto3.session.Session()
-        self._client = self._session.client('sqs')
+        self._client = self._session.client("sqs")
 
         self._queue_name = queue
         self._queue_url = queue_url
@@ -58,8 +66,8 @@ class SqsLauncher(object):
         if not queue_url:
             queues = self._client.list_queues(QueueNamePrefix=self._queue_name)
             exists = False
-            for q in queues.get('QueueUrls', []):
-                qname = q.split('/')[-1]
+            for q in queues.get("QueueUrls", []):
+                qname = q.split("/")[-1]
                 if qname == self._queue_name:
                     exists = True
                     self._queue_url = q
@@ -69,12 +77,12 @@ class SqsLauncher(object):
                     q = self._client.create_queue(
                         QueueName=self._queue_name,
                         Attributes={
-                            'VisibilityTimeout': visibility_timeout  # 10 minutes
-                        }
+                            "VisibilityTimeout": visibility_timeout  # 10 minutes
+                        },
                     )
-                    self._queue_url = q['QueueUrl']
+                    self._queue_url = q["QueueUrl"]
                 else:
-                    raise ValueError('No queue found with name ' + self._queue_name)
+                    raise ValueError("No queue found with name " + self._queue_name)
         else:
             self._queue_name = self._get_queue_name_from_url(queue_url)
 
@@ -88,10 +96,8 @@ class SqsLauncher(object):
         """
         sqs_logger.info("Sending message to queue " + self._queue_name)
         return self._client.send_message(
-            QueueUrl=self._queue_url,
-            MessageBody=self._serializer(message),
-            **kwargs
+            QueueUrl=self._queue_url, MessageBody=self._serializer(message), **kwargs
         )
 
     def _get_queue_name_from_url(self, url):
-        return url.split('/')[-1]
+        return url.split("/")[-1]
